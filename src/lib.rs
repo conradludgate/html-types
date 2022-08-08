@@ -19,7 +19,7 @@ impl Element for str {
     }
 }
 
-impl Element for &str {
+impl Element for String {
     fn render(&self, fmt: &mut Formatter) -> Result {
         fmt.write_str(self)
     }
@@ -37,7 +37,7 @@ impl<C: ElementList> Element for Div<C> {
     }
 }
 
-fn foo(name: &str) -> String {
+fn demo_template(name: &str) -> impl Element + '_ {
     Body {
         children: (
             Div {
@@ -50,11 +50,9 @@ fn foo(name: &str) -> String {
             "baz",
         ),
     }
-    .render_to_string()
-    .unwrap()
 }
 
 #[test]
 fn test() {
-    println!("{}", foo("hello"))
+    println!("{}", demo_template("hello").render_to_string().unwrap())
 }

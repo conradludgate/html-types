@@ -6,14 +6,22 @@ use crate::{
 pub trait ElementList {
     fn render<'a, 'b>(&self, fmt: ElementFmt<'a, 'b>) -> Result<ElementFmt<'a, 'b>>;
 }
+
 impl<E: Element> ElementList for [E] {
     fn render<'a, 'b>(&self, fmt: ElementFmt<'a, 'b>) -> Result<ElementFmt<'a, 'b>> {
-        self.iter().try_fold(fmt, |f, e| f.render_child(&*e))
+        self.iter().try_fold(fmt, |f, e| f.render_child(e))
     }
 }
+
 impl<E: Element, const N: usize> ElementList for [E; N] {
     fn render<'a, 'b>(&self, fmt: ElementFmt<'a, 'b>) -> Result<ElementFmt<'a, 'b>> {
-        self.iter().try_fold(fmt, |f, e| f.render_child(&*e))
+        self.iter().try_fold(fmt, |f, e| f.render_child(e))
+    }
+}
+
+impl<E: Element> ElementList for Vec<E> {
+    fn render<'a, 'b>(&self, fmt: ElementFmt<'a, 'b>) -> Result<ElementFmt<'a, 'b>> {
+        self.iter().try_fold(fmt, |f, e| f.render_child(e))
     }
 }
 
