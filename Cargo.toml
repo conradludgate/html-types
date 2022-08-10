@@ -9,3 +9,9 @@ edition = "2021"
 
 [dev-dependencies]
 insta = "1"
+typed-html = { git = "https://github.com/bodil/typed-html", rev = "4c13ecca" }
+criterion = "0.3"
+
+[[bench]]
+name = "render"
+harness = false

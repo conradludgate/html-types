@@ -21,31 +21,34 @@ impl<'a> Formatter<'a> {
         self.buf.write_str(s)?;
         self.buf.write_char('\n')
     }
-    pub fn start(&mut self, element: &'static str) -> Result<ElementFmt<'_, 'a>> {
+    pub fn open_and_close(&mut self, element: &'static str) -> Result {
         self.render_tabs()?;
-        write!(self.buf, "<{element}")?;
+        self.buf.write_char('<')?;
+        self.buf.write_str(element)?;
+        self.buf.write_str("/>\n")
+    }
+    pub fn open(&mut self, element: &'static str) -> Result<ElementFmt<'_, 'a>> {
+        self.render_tabs()?;
+        self.buf.write_char('<')?;
+        self.buf.write_str(element)?;
+        self.buf.write_str(">\n")?;
         self.depth += 1;
         Ok(ElementFmt {
             fmt: self,
             element,
-            children: 0,
         })
     }
 }
 
 #[must_use]
 pub struct ElementFmt<'a, 'b> {
-    fmt: &'a mut Formatter<'b>,
+    pub(crate) fmt: &'a mut Formatter<'b>,
     element: &'static str,
-    children: usize,
 }
 
 impl ElementFmt<'_, '_> {
-    pub fn render_child(mut self, child: &dyn Element) -> Result<Self> {
-        if self.children == 0 {
-            self.fmt.buf.write_str(">\n").unwrap();
-        }
-        self.children += 1;
+    #[inline]
+    pub fn render_child(self, child: &impl Element) -> Result<Self> {
         child.render(self.fmt)?;
         Ok(self)
     }
@@ -57,15 +60,10 @@ impl ElementFmt<'_, '_> {
 
     pub fn close(self) -> Result {
         self.fmt.depth -= 1;
-        // close the tag approriately
-        if self.children > 0 {
-            self.fmt.render_tabs()?;
-            self.fmt.buf.write_str("</")?;
-            self.fmt.buf.write_str(self.element)?;
-            self.fmt.buf.write_str(">\n")
-        } else {
-            self.fmt.buf.write_str("/>\n")
-        }
+        self.fmt.render_tabs()?;
+        self.fmt.buf.write_str("</")?;
+        self.fmt.buf.write_str(self.element)?;
+        self.fmt.buf.write_str(">\n")
     }
 }
 

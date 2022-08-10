@@ -7,8 +7,11 @@ use crate::{
 pub trait Tag {
     const NAME: &'static str;
 
-    fn fmt<'a, 'b>(&self, fmt: &'a mut Formatter<'b>) -> Result<ElementFmt<'a, 'b>> {
-        fmt.start(Self::NAME)
+    fn open_and_close(&self, fmt: &mut Formatter) -> Result {
+        fmt.open_and_close(Self::NAME)
+    }
+    fn open<'a, 'b>(&self, fmt: &'a mut Formatter<'b>) -> Result<ElementFmt<'a, 'b>> {
+        fmt.open(Self::NAME)
     }
 }
 
@@ -37,7 +40,7 @@ impl<P: Parent> ParentExt for P {}
 pub struct Closed<T>(T);
 impl<T: Tag> Element for Closed<T> {
     fn render(&self, fmt: &mut Formatter) -> Result {
-        self.0.fmt(fmt)?.close()
+        self.0.open_and_close(fmt)
     }
 }
 
@@ -51,6 +54,6 @@ pub struct WithChildren<T, C> {
 impl<P: Parent, C: ElementList> Element for WithChildren<P, C> {
     fn render(&self, fmt: &mut Formatter) -> Result {
         let Self { tag, children } = self;
-        tag.fmt(fmt)?.render_children(children)?.close()
+        tag.open(fmt)?.render_children(children)?.close()
     }
 }
