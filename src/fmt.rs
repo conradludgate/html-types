@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use crate::Element;
+use crate::{Element, ElementList};
 
 pub struct Formatter<'a> {
     depth: usize,
@@ -33,25 +33,11 @@ impl<'a> Formatter<'a> {
     }
 }
 
+#[must_use]
 pub struct ElementFmt<'a, 'b> {
     fmt: &'a mut Formatter<'b>,
     element: &'static str,
     children: usize,
-}
-
-impl Drop for ElementFmt<'_, '_> {
-    fn drop(&mut self) {
-        self.fmt.depth -= 1;
-        // close the tag approriately
-        if self.children > 0 {
-            self.fmt.render_tabs().unwrap();
-            self.fmt.buf.write_str("</").unwrap();
-            self.fmt.buf.write_str(self.element).unwrap();
-            self.fmt.buf.write_str(">\n").unwrap();
-        } else {
-            self.fmt.buf.write_str("/>\n").unwrap();
-        }
-    }
 }
 
 impl ElementFmt<'_, '_> {
@@ -62,6 +48,24 @@ impl ElementFmt<'_, '_> {
         self.children += 1;
         child.render(self.fmt)?;
         Ok(self)
+    }
+
+    #[inline]
+    pub fn render_children(self, children: &impl ElementList) -> Result<Self> {
+        children.render(self)
+    }
+
+    pub fn close(self) -> Result {
+        self.fmt.depth -= 1;
+        // close the tag approriately
+        if self.children > 0 {
+            self.fmt.render_tabs()?;
+            self.fmt.buf.write_str("</")?;
+            self.fmt.buf.write_str(self.element)?;
+            self.fmt.buf.write_str(">\n")
+        } else {
+            self.fmt.buf.write_str("/>\n")
+        }
     }
 }
 
