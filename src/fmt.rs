@@ -4,7 +4,7 @@ use crate::Element;
 
 pub struct Formatter<'a> {
     depth: usize,
-    buf: &'a mut (dyn Write + 'a),
+    pub(crate) buf: &'a mut (dyn Write + 'a),
 }
 
 pub type Result<T = (), E = std::fmt::Error> = std::result::Result<T, E>;

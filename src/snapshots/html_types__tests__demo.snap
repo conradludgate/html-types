@@ -1,0 +1,17 @@
+---
+source: src/lib.rs
+expression: "demo_template(\"hello\").render_to_string().unwrap()"
+---
+<body>
+  <div>
+    title
+    hello
+  </div>
+  <div>
+    foo
+    bar
+  </div>
+  <div/>
+  baz
+</body>
+
