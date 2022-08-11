@@ -12,6 +12,7 @@ mod element;
 mod element_list;
 pub mod fmt;
 pub mod tag;
+pub mod attributes;
 
 pub struct Body;
 pub struct Div;
